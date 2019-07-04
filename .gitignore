@@ -1,0 +1,33 @@
+# Distribution / packaging
+.Python
+*.pyc
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.idea
+
+# Serverless directories
+.serverless
+.serverless_dev_complete
+vendored
+
+# serverless plugin directory
+node_modules
+
+# Tests checks and reports
+.coverage
+test/coverage_report
