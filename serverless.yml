@@ -25,7 +25,7 @@ plugins:
   - serverless-offline
 
 custom:
-  project: demo
+  project: demo # only affect subdomain
   name: ${self:service}-${self:provider.stage}
 
   defaults:
