@@ -25,7 +25,7 @@ plugins:
   - serverless-offline
 
 custom:
-  subdomain: api
+  project: demo
   name: ${self:service}-${self:provider.stage}
 
   defaults:
@@ -40,7 +40,7 @@ custom:
   # serverless-domain-manager
   customDomain:
     endpointType: regional
-    domainName: ${self:custom.subdomain}.bagsprincess.com
+    domainName: ${self:custom.project}.api.bagsprincess.com
     stage: ${self:provider.stage}
     basePath: ${self:custom.basePath.${self:provider.stage}, self:custom.basePath.default}
     # certificateName: '*.bagsprincess.com'
@@ -154,5 +154,5 @@ resources:
        ApiEndpoint:
           Description: API endpoint akan
           Export:
-            Name: platone:${self:provider.stage}:${self:service}:api:endpoint
+            Name: ${self:provider.stage}:${self:service}:api:endpoint
           Value: ${self:custom.customEndpoint}

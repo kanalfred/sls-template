@@ -44,3 +44,6 @@
 
 # speed up development
     https://www.serverless.com/blog/quick-tips-for-faster-serverless-development/
+
+# dynamodb
+https://github.com/serverless/examples/blob/master/aws-python-rest-api-with-dynamodb/serverless.yml
