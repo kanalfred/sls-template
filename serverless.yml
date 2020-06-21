@@ -40,7 +40,8 @@ custom:
   # serverless-domain-manager
   customDomain:
     endpointType: regional
-    domainName: ${self:custom.project}.api.bagsprincess.com
+    # domainName: ${self:custom.project}.api.bagsprincess.com
+    domainName: ${self:custom.project}.api.kanalfred.com
     stage: ${self:provider.stage}
     basePath: ${self:custom.basePath.${self:provider.stage}, self:custom.basePath.default}
     # certificateName: '*.bagsprincess.com'
