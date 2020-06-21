@@ -1,9 +1,11 @@
 import json
 
 
-def hello(event, context):
+def about(event, context):
+    # return {"message": "Go Curiosity!", "version": os.environ.get('SLS_COMPONENT_VERSION', 'local')}
+
     body = {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
+        "message": "Go Serverless v1.0! Your function executed successfully!####",
         # "input": event
         "input": "very cool!"
     }
@@ -23,3 +25,17 @@ def hello(event, context):
         "event": event
     }
     """
+
+def demo(event, context):
+    body = {
+        "message": "akan test response yeah",
+        # "input": event
+        "input": "very cool!## fast"
+    }
+
+    response = {
+        "statusCode": 200,
+        "body": json.dumps(body)
+    }
+
+    return response

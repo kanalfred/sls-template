@@ -1,52 +1,61 @@
 # Welcome to Serverless!
 #
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
 # For full config options, check the docs:
 #    docs.serverless.com
-#
-# Happy Coding!
 
-service: alf-template
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+service: template
 
 frameworkVersion: ">=1.28.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.7
+  timeout: 5
+  # memorySize: 2048
+  stage: ${opt:stage, self:custom.defaults.stage}
+  region: us-west-2
+
+  apiKeys:
+    - ${self:service}-${self:provider.stage}
 
 plugins:
   - serverless-plugin-scripts
   - serverless-domain-manager
   - serverless-pseudo-parameters
+  - serverless-offline
+
 custom:
-  # Settings for plugin serverless-domain-manager
+  subdomain: api
+  name: ${self:service}-${self:provider.stage}
+
+  defaults:
+      stage: local
+      region: us-west-2
+
+  basePath:
+      prod: ${self:service}
+      default: ${self:provider.stage}-${self:service}
+
+  # plugin settings
+  # serverless-domain-manager
   customDomain:
     endpointType: regional
-    domainName: sls.bagsprincess.com
+    domainName: ${self:custom.subdomain}.bagsprincess.com
     stage: ${self:provider.stage}
-    # stage: akan
-    basePath: api
+    basePath: ${self:custom.basePath.${self:provider.stage}, self:custom.basePath.default}
     # certificateName: '*.bagsprincess.com'
     createRoute53Record: true
 
+  customEndpoint: "https://${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
+
+  # serverless-plugin-scripts
   scripts:
     commands:
       vars: |
-        echo "${self:service} ${self:provider.stage}"
-        echo "${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
+        echo "Stage: ${self:provider.stage}"
+        echo "Name: ${self:custom.name}"
+        echo "Base Endpoint: https://${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
 
-provider:
-  name: aws
-  runtime: python2.7
-  timeout: 10
-  # memorySize: 2048
-  stage: ${opt:stage}
-  region: us-west-2
 
 # you can overwrite defaults here
 #  stage: dev
@@ -72,22 +81,34 @@ provider:
 #  environment:
 #    variable1: value1
 
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.py
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.py
-#    - exclude-me-dir/**
+# packaging information here - deploy
+package:
+  include:
+    - docs/**
+  exclude:
+    - bin/**
+    - features/**
+    - node_modules/**
+    - test/**
 
+# Functions
 functions:
-  hello:
-    handler: handler.hello
+  about:
+    handler: handler.about
+    timeout: 5
+    memorySize: 128
     events:
         - http:
             method: get
             path: /
+
+  demo:
+    handler: handler.demo
+    events:
+        - http:
+            method: get
+            path: /demo
+            private: true
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -134,4 +155,4 @@ resources:
           Description: API endpoint akan
           Export:
             Name: platone:${self:provider.stage}:${self:service}:api:endpoint
-          Value: "http://asdfs.com"
+          Value: ${self:custom.customEndpoint}
