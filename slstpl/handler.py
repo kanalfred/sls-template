@@ -1,4 +1,5 @@
 import json
+import boto3
 
 
 def about(event, context):
@@ -39,3 +40,8 @@ def demo(event, context):
     }
 
     return response
+
+
+# for debug
+if __name__ == "__main__":
+        demo('', '')

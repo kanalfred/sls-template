@@ -16,14 +16,23 @@ provider:
   region: us-west-2
 
   apiKeys:
+    # auto generate
     - ${self:service}-${self:provider.stage}
+    # manual key
+    - name: ${self:service}-${self:provider.stage}-share
+      value: alfredakimialfredakimi
+
+  environment:
+    SLS_SERVICE: ${self:service}
+    SLS_STAGE: ${self:provider.stage}
+    S3_BUCKET: ${self:service}${self:provider.stage}
 
 plugins:
   - serverless-plugin-scripts
   - serverless-domain-manager
   - serverless-pseudo-parameters
   - serverless-offline
-
+  - serverless-python-requirements
 custom:
   project: demo # only affect subdomain
   name: ${self:service}-${self:provider.stage}
@@ -47,7 +56,11 @@ custom:
     # certificateName: '*.bagsprincess.com'
     createRoute53Record: true
 
-  customEndpoint: "https://${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
+  # serverless-python-requirements
+  pythonRequirements:
+    pythonBin: python3.7
+    # Non-pure-Python modules
+    # dockerizePip: non-linux
 
   # serverless-plugin-scripts
   scripts:
@@ -57,6 +70,7 @@ custom:
         echo "Name: ${self:custom.name}"
         echo "Base Endpoint: https://${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
 
+  customEndpoint: "https://${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
 
 # you can overwrite defaults here
 #  stage: dev
@@ -91,11 +105,13 @@ package:
     - features/**
     - node_modules/**
     - test/**
+    - venv/**
 
 # Functions
 functions:
   about:
-    handler: handler.about
+    handler: slstpl/handler.about
+    package: {} # sls deploy function fix
     timeout: 5
     memorySize: 128
     events:
@@ -104,7 +120,8 @@ functions:
             path: /
 
   demo:
-    handler: handler.demo
+    handler: slstpl/handler.demo
+    package: {} # sls deploy function fix
     events:
         - http:
             method: get
