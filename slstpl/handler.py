@@ -33,6 +33,11 @@ def about(event, context):
     """
 
 def demo(event, context):
+    # get path parameter
+    #    event['pathParameters']['id']
+    # post/put data
+    #    event["body"]
+
     body = {
         "message": "akan test response yeah",
         # "input": event
