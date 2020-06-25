@@ -34,12 +34,23 @@ provider:
         - lambda:InvokeFunction
       Resource: "*"
 
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
   environment:
     SLS_SERVICE: ${self:service}
     SLS_STAGE: ${self:provider.stage}
     LOG_NAME: ${self:custom.name}
     LOG_LEVEL: ${opt:loglevel, env:LOG_LEVEL, self:custom.defaults.log_level}
     S3_BUCKET: ${self:service}-${self:provider.stage}
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
 
 plugins:
   - serverless-plugin-scripts
@@ -89,30 +100,6 @@ custom:
 
   customEndpoint: "https://${self:custom.customDomain.domainName}/${self:custom.customDomain.basePath}"
 
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
 # packaging information here - deploy
 package:
   include:
@@ -143,7 +130,6 @@ functions:
         - http:
             method: get
             path: /demo
-            private: true
 
   saves3:
     handler: slstpl/handler.save_s3
@@ -152,6 +138,7 @@ functions:
         - http:
             method: get
             path: /s3
+            private: true
 
   savesnosql:
     handler: slstpl/handler.save_nosql
@@ -160,8 +147,8 @@ functions:
         - http:
             method: get
             path: /nosql
+            private: true
 
-#    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
 #    events:
@@ -190,11 +177,7 @@ functions:
 #          pool: MyUserPool
 #          trigger: PreSignUp
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
+# CloudFormation resource templates here
 resources:
   Resources:
     # S3
@@ -202,6 +185,24 @@ resources:
       Type: "AWS::S3::Bucket"
       Properties:
         BucketName: ${self:provider.environment.S3_BUCKET}
+
+    # dynamodb
+    slstplDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH      # HASH:partition key, RANGE:composite key
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1  # 1 read per second
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
 
   Outputs:
     ApiEndpoint:
