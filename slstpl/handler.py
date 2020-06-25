@@ -95,7 +95,6 @@ def save_nosql(event, context):
         }
     )
 
-
     response = {
         "statusCode": 200,
         "body": json.dumps(
